@@ -478,6 +478,8 @@ def fetch_rss_news(source_name: str, url: str) -> List[NewsItem]:
     print(f"Fetching RSS: {source_name}")
     items = []
     try:
+        # Set User Agent to avoid blocking on Cloud (Render)
+        feedparser.USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         feed = feedparser.parse(url)
         for entry in feed.entries[:10]: # Limit to 10
             title = entry.title
