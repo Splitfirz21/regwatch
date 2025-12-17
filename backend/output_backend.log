@@ -1,0 +1,40 @@
+/Users/sabareesh/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [19253]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+Running scheduled scrape...
+Fetching RSS: The Straits Times
+Fetching RSS: The Straits Times
+Fetching RSS: CNA
+Fetching RSS: CNA
+Backfilling 30-day history for whitelist sources...
+  -> Running Backfill Query 1...
+  -> Running Backfill Query 2...
+  -> Running Backfill Query 3...
+  -> Running Backfill Query 4...
+  -> Running Backfill Query 5...
+  -> Running Backfill Query 6...
+  -> Running Backfill Query 7...
+  -> Running Backfill Query 8...
+Scraped 26 items. Added 0 new items.
+INFO:     127.0.0.1:55337 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55337 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55378 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55378 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55442 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55442 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55444 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55444 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55444 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55467 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55510 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55512 - "GET /news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55515 - "OPTIONS /search HTTP/1.1" 200 OK
+Searching for: dpm speech at pep awards 2025
+INFO:     127.0.0.1:55515 - "POST /search HTTP/1.1" 200 OK
+Searching for: dpm speech at pep awards 2025
+INFO:     127.0.0.1:55515 - "POST /search HTTP/1.1" 200 OK
+Searching for: dpm speech at pep awards 2025 on regulations
+INFO:     127.0.0.1:55515 - "POST /search HTTP/1.1" 200 OK
