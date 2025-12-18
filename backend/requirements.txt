@@ -11,8 +11,6 @@ python-multipart
 httpx
 psycopg2-binary
 feedparser
-sentence-transformers
 apscheduler
-scikit-learn
 faker
 python-dateutil
