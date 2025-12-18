@@ -1,7 +1,7 @@
 """
 Lightweight Vector Engine Replacement for Free Tier Cloud Deployment.
 Removes 'sentence-transformers' and 'torch' dependencies to save ~500MB RAM.
-Falls back to simple keyword/text matching.
+Falls back to simple keyword matching.
 """
 from typing import List
 from models import NewsItem
@@ -12,6 +12,13 @@ def get_model():
 
 def index_items(items: List[NewsItem]):
     # Stub: No indexing needed
+    pass
+
+def load_rejected_embeddings():
+    """
+    Stub: Does nothing in Lite mode.
+    Exists to satisfy scraper.py imports/calls.
+    """
     pass
 
 def search_similar(query: str, items: List[NewsItem], top_k: int = 5) -> List[NewsItem]:
