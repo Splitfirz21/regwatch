@@ -73,7 +73,7 @@ export default function NewsCard({ item, onRemove, onAdd, onUpdate, highlight, i
         setEditing(null);
 
         try {
-            const API_Base = `http://${window.location.hostname}:8005`;
+            const API_Base = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8005`;
             const res = await fetch(`${API_Base}/items/${item.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
