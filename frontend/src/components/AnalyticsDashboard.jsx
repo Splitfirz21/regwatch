@@ -5,8 +5,8 @@ import {
     PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { FileText, Download, X, Info, Filter } from 'lucide-react';
-import ReactMarkdown from 'react-markdown'; // Assuming we have this or native rendering, actually we don't have react-markdown installed. Let's use simple <pre> or dangerouslySetInnerHTML or install it. 
-// We likely don't have react-markdown. I'll stick to whitespace-pre-wrap div.
+import ReactMarkdown from 'react-markdown';
+import API_BASE_URL from '../config';
 
 export default function AnalyticsDashboard() {
     const [data, setData] = useState(null);
@@ -22,7 +22,7 @@ export default function AnalyticsDashboard() {
     useEffect(() => {
         const fetchGlobal = async () => {
             try {
-                const API = `http://${window.location.hostname}:8005`;
+                const API = API_BASE_URL;
                 const res = await fetch(`${API}/stats?impact=All`);
                 const json = await res.json();
                 setGlobalData(json);
@@ -35,7 +35,7 @@ export default function AnalyticsDashboard() {
 
     const fetchStats = async () => {
         try {
-            const API = `http://${window.location.hostname}:8005`;
+            const API = API_BASE_URL;
             const res = await fetch(`${API}/stats?impact=${impactFilter}`);
             const json = await res.json();
             setData(json);

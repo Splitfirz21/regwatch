@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ExternalLink, Calendar, Plus, X, ThumbsUp, ThumbsDown } from 'lucide-react';
 import clsx from 'clsx';
 import { SECTORS, AGENCIES } from '../constants';
+import API_BASE_URL from '../config';
 
 const Highlight = ({ text, highlight }) => {
     if (!highlight || !text) return text;
@@ -73,7 +74,7 @@ export default function NewsCard({ item, onRemove, onAdd, onUpdate, highlight, i
         setEditing(null);
 
         try {
-            const API_Base = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8005`;
+            const API_Base = API_BASE_URL;
             const res = await fetch(`${API_Base}/items/${item.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
