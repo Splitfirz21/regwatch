@@ -189,14 +189,14 @@ def create_item(item: NewsItem, session: Session = Depends(get_session)):
     return item
 
 @app.get("/news", response_model=List[NewsItem])
-def get_news(sector: Optional[str] = None, session: Session = Depends(get_session)):
+def get_news(sector: Optional[str] = None, limit: int = 50, offset: int = 0, session: Session = Depends(get_session)):
     try:
         # Filter hidden items
         query = select(NewsItem).where(NewsItem.is_hidden == False)
         if sector:
             query = query.where(NewsItem.sector == sector)
             
-        items = session.exec(query.order_by(NewsItem.published_at.desc())).all()
+        items = session.exec(query.order_by(NewsItem.published_at.desc()).limit(limit).offset(offset)).all()
         return items
     except Exception as e:
         print(f"Error fetching news: {e}")
