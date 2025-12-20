@@ -68,15 +68,18 @@ def scheduled_scrape():
                 existing_urls.add(matched_existing.url) # Also verify against the primary URL
                 
                 if item.url not in existing_urls:
-                    new_sources = list(matched_existing.related_sources)
-                    new_sources.append({
-                        "source": item.source,
-                        "url": item.url,
-                        "date": item.published_at.isoformat() if item.published_at else None
-                    })
-                    matched_existing.related_sources = new_sources
-                    session.add(matched_existing)
-                    updated_count += 1
+                    if item.source != matched_existing.source:
+                        new_sources = list(matched_existing.related_sources)
+                        new_sources.append({
+                            "source": item.source,
+                            "url": item.url,
+                            "date": item.published_at.isoformat() if item.published_at else None
+                        })
+                        matched_existing.related_sources = new_sources
+                        session.add(matched_existing)
+                        updated_count += 1
+                    else:
+                        print(f"Skipping self-source duplicate: {item.title}")
             else:
                 # Add new item
                 session.add(item)
