@@ -22,16 +22,17 @@ import vector_engine # RAG
 # Scheduler setup
 scheduler = BackgroundScheduler()
 
+from difflib import SequenceMatcher
+
 def scheduled_scrape():
     print("Running scheduled scrape...")
-    headers = {"User-Agent": "Mozilla/5.0"} # Placeholder if we were doing real requests
-    items = scraper.fetch_news() # Changed to scraper.fetch_news()
+    headers = {"User-Agent": "Mozilla/5.0"}
+    items = scraper.fetch_news()
     
     with Session(db_engine) as session:
-        # Get existing items mapped by URL AND Title for deduplication
         existing_db_items = session.exec(select(NewsItem)).all()
         url_map = {item.url: item for item in existing_db_items}
-        title_map = {item.title.lower().strip(): item for item in existing_db_items} # New Dedupe Map
+        existing_titles = [(item.title, item) for item in existing_db_items]
         
         new_count = 0
         updated_count = 0
@@ -40,52 +41,47 @@ def scheduled_scrape():
             # 1. URL Check (Exact Match)
             if item.url in url_map:
                 existing = url_map[item.url]
-                # Updates (Impact, Hidden status, etc)
-                if not existing.is_manual:
-                    # Update Fields if changed
-                    if item.impact_rating != existing.impact_rating: # Don't overwrite manual impact
-                         existing.impact_rating = item.impact_rating
-                         session.add(existing)
-                         updated_count += 1
-            # 2. Title Check (Fuzzy Content Match) - Check normalized title
-            elif item.title.lower().strip() in title_map:
-                existing = title_map[item.title.lower().strip()]
-                print(f"Merging Duplicate Source: {item.title} ({item.source}) into existing ({existing.source})")
-                
-                # Init list if None
-                if existing.related_sources is None:
-                    existing.related_sources = []
+                if not existing.is_manual and item.impact_rating != existing.impact_rating: 
+                     existing.impact_rating = item.impact_rating
+                     session.add(existing)
+                     updated_count += 1
+                continue
+
+            # 2. Fuzzy Title Check
+            matched_existing = None
+            normalized_new = item.title.lower()
+            
+            for ex_title, ex_item in existing_titles:
+                # Check similarity
+                ratio = SequenceMatcher(None, normalized_new, ex_title.lower()).ratio()
+                if ratio > 0.65: # Similarity Threshold
+                    matched_existing = ex_item
+                    print(f"Fuzzy Match: '{item.title}' matches '{ex_title}' ({ratio:.2f}). Merging Sources.")
+                    break
+            
+            if matched_existing:
+                # Merge Logic
+                if matched_existing.related_sources is None:
+                    matched_existing.related_sources = []
                     
-                # Check uniqueness in related_sources
-                # We need to manually serialize/deserialize because SQLModel JSON might be returning list or None
-                # Actually, SQLAlchemy handles it. logic_sources is a list.
+                existing_urls = {s.get('url') for s in matched_existing.related_sources}
+                existing_urls.add(matched_existing.url) # Also verify against the primary URL
                 
-                # Check if this source/url is already in list to avoid duplicates there
-                is_present = False
-                for src in existing.related_sources:
-                    if src.get('url') == item.url:
-                        is_present = True
-                        break
-                
-                if not is_present and item.url != existing.url:
-                    # Append new source info
-                    # We must create a new list reference for SQLAlchemy to detect mutation on JSON types usually
-                    new_sources = list(existing.related_sources)
+                if item.url not in existing_urls:
+                    new_sources = list(matched_existing.related_sources)
                     new_sources.append({
                         "source": item.source,
                         "url": item.url,
                         "date": item.published_at.isoformat() if item.published_at else None
                     })
-                    existing.related_sources = new_sources
-                    session.add(existing)
+                    matched_existing.related_sources = new_sources
+                    session.add(matched_existing)
                     updated_count += 1
-                
-                continue
             else:
                 # Add new item
                 session.add(item)
                 url_map[item.url] = item 
-                title_map[item.title.lower().strip()] = item # Update map for current batch
+                existing_titles.append((item.title, item))
                 new_count += 1
         
         session.commit()
