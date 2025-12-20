@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from datetime import datetime
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from sqlmodel import Session, select, func
 from typing import List, Optional
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -102,6 +103,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -189,14 +192,21 @@ def create_item(item: NewsItem, session: Session = Depends(get_session)):
     return item
 
 @app.get("/news", response_model=List[NewsItem])
-def get_news(sector: Optional[str] = None, limit: int = 50, offset: int = 0, session: Session = Depends(get_session)):
+def get_news(sector: Optional[str] = None, limit: Optional[int] = None, offset: int = 0, session: Session = Depends(get_session)):
     try:
         # Filter hidden items
         query = select(NewsItem).where(NewsItem.is_hidden == False)
         if sector:
             query = query.where(NewsItem.sector == sector)
             
-        items = session.exec(query.order_by(NewsItem.published_at.desc()).limit(limit).offset(offset)).all()
+        # Sort
+        query = query.order_by(NewsItem.published_at.desc())
+        
+        # Apply pagination only if requested
+        if limit:
+            query = query.limit(limit).offset(offset)
+            
+        items = session.exec(query).all()
         return items
     except Exception as e:
         print(f"Error fetching news: {e}")
