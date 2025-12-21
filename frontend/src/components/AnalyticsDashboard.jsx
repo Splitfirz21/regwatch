@@ -164,7 +164,7 @@ export default function AnalyticsDashboard() {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[400px]">
                 {/* Impact Mix - Uses Global Context */}
-                <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
+                <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 h-[350px]">
                     <h3 className="text-lg font-semibold text-gray-200 mb-6">Impact Distribution</h3>
                     <ResponsiveContainer width="100%" height="85%">
                         <PieChart>
@@ -201,7 +201,7 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Agency Leaderboard */}
-                <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
+                <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 h-[350px]">
                     <h3 className="text-lg font-semibold text-gray-200 mb-6">Top Agencies (Activity)</h3>
                     <ResponsiveContainer width="100%" height="85%">
                         <BarChart data={data.agencies.slice(0, 5)} layout="vertical">

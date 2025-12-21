@@ -109,7 +109,7 @@ export default function NewsCard({ item, onRemove, onAdd, onUpdate, highlight, i
             {!onAdd && (
                 <button
                     onClick={() => onRemove(item.id)}
-                    className="absolute -top-2 -right-2 bg-gray-700 text-gray-400 hover:bg-red-500 hover:text-white p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all z-10"
+                    className="absolute -top-2 -right-2 bg-gray-700 text-gray-400 hover:bg-red-500 hover:text-white p-1 rounded-full shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all z-10"
                     title="Remove and see less like this"
                 >
                     <X size={14} />
@@ -230,25 +230,7 @@ export default function NewsCard({ item, onRemove, onAdd, onUpdate, highlight, i
                         <Highlight text={(item.summary || "").replace(/<[^>]+>/g, '')} highlight={highlight} />
                     </div>
                     {/* Related Sources */}
-                    {item.related_sources && item.related_sources.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-gray-700/50">
-                            <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mr-2">Also seen on:</span>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {item.related_sources.map((src, idx) => (
-                                    <a
-                                        key={idx}
-                                        href={src.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-500/20"
-                                        title={`View on ${src.source}`}
-                                    >
-                                        {src.source}
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+
                 </div>
                 <a
                     href={item.url}
