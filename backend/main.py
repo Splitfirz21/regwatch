@@ -328,13 +328,15 @@ class SearchResponse(BaseModel):
 
 @app.post("/search", response_model=SearchResponse)
 def search_regulatory_scout(req: SearchRequest, session: Session = Depends(get_session)):
-    # 1. Try Vector Search on Local DB first
-    # Get all valid items
-    db_items = session.exec(select(NewsItem).where(NewsItem.is_hidden == False)).all()
-    
-    # Search locally
-    local_results = vector_engine.search_similar(req.query, list(db_items), top_k=5)
-    
+    # 1. Try Vector/Smart Search
+    # Optimization: In Lite Mode (Cloud), push search to DB to save RAM.
+    if getattr(vector_engine, "IS_LITE", False):
+        local_results = vector_engine.search_similar(req.query, session=session, top_k=5)
+    else:
+        # Local Mode: Load items for In-Memory Vector Search
+        db_items = session.exec(select(NewsItem).where(NewsItem.is_hidden == False)).all()
+        local_results = vector_engine.search_similar(req.query, list(db_items), top_k=5)
+
     # 2. Results Strategy
     # If we have good local results, use them.
     # Otherwise, go to Google News (Web).
