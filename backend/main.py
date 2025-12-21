@@ -45,49 +45,11 @@ def scheduled_scrape():
                      existing.impact_rating = item.impact_rating
                      session.add(existing)
                      updated_count += 1
-                continue
-
-            # 2. Fuzzy Title Check
-            matched_existing = None
-            normalized_new = item.title.lower()
-            
-            for ex_title, ex_item in existing_titles:
-                # Check similarity
-                ratio = SequenceMatcher(None, normalized_new, ex_title.lower()).ratio()
-                if ratio > 0.65: # Similarity Threshold
-                    matched_existing = ex_item
-                    print(f"Fuzzy Match: '{item.title}' matches '{ex_title}' ({ratio:.2f}). Merging Sources.")
-                    break
-            
-            if matched_existing:
-                # Merge Logic
-                if matched_existing.related_sources is None:
-                    matched_existing.related_sources = []
-                    
-                existing_urls = {s.get('url') for s in matched_existing.related_sources}
-                existing_urls.add(matched_existing.url) # Also verify against the primary URL
-                
-                if item.url not in existing_urls:
-                    if item.source != matched_existing.source:
-                        new_sources = list(matched_existing.related_sources)
-                        new_sources.append({
-                            "source": item.source,
-                            "url": item.url,
-                            "date": item.published_at.isoformat() if item.published_at else None
-                        })
-                        matched_existing.related_sources = new_sources
-                        session.add(matched_existing)
-                        updated_count += 1
-                    else:
-                        print(f"Skipping self-source duplicate: {item.title}")
             else:
                 # Add new item
                 session.add(item)
                 url_map[item.url] = item 
-                existing_titles.append((item.title, item))
                 new_count += 1
-        
-        session.commit()
     print(f"Scraped {len(items)} items. Added {new_count}, Updated {updated_count}.")
 
 @asynccontextmanager
