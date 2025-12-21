@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional, List, Dict
 from sqlmodel import Field, SQLModel, Relationship
 from sqlalchemy import Column, JSON
+from pgvector.sqlalchemy import Vector
 
 class NewsItem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -21,6 +22,9 @@ class NewsItem(SQLModel, table=True):
     # Store other sources for same article
     # Format: [{"source": "CNA", "url": "..."}]
     related_sources: Optional[List[Dict]] = Field(default=None, sa_column=Column(JSON))
+    
+    # Embedding for Semantic Search (Gemini embedding-001 = 768 dims)
+    embedding: Optional[List[float]] = Field(default=None, sa_column=Column(Vector(768)))
     
     # Metadata for the system
     scraped_at: datetime = Field(default_factory=datetime.utcnow)
