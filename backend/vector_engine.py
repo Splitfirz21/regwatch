@@ -18,8 +18,41 @@ def get_model():
     return True
 
 def index_items(items: List[NewsItem]):
-    # Items are indexed specific backfill scripts or hook
-    pass
+    """
+    Generate and save embeddings for a list of items (Level 3).
+    """
+    if not items:
+        return
+        
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        print("Skipping embedding generation: No API Key")
+        return
+
+    # Create local session to update artifacts
+    from database import engine
+    with Session(engine) as session:
+        count = 0
+        for item in items:
+            try:
+                # Re-fetch to attach to session
+                db_item = session.get(NewsItem, item.id)
+                if not db_item: 
+                    continue
+                
+                if not db_item.embedding:
+                     text_content = f"{db_item.title} {db_item.summary or ''}"
+                     vec = get_remote_embedding(text_content)
+                     if vec:
+                         db_item.embedding = vec
+                         session.add(db_item)
+                         count += 1
+            except Exception as e:
+                print(f"Error embedding item {item.id}: {e}")
+        
+        if count > 0:
+            session.commit()
+            print(f"✅ Generated embeddings for {count} new items.")
 
 def load_rejected_embeddings():
     pass
