@@ -245,10 +245,7 @@ def toggle_save_item(item_id: int, session: Session = Depends(get_session)):
     session.refresh(item)
     return {"status": "ok", "is_saved": item.is_saved}
 
-@app.post("/scan")
-def trigger_scan(background_tasks: BackgroundTasks):
-    background_tasks.add_task(scheduled_scrape)
-    return {"message": "Scan triggered in background"}
+
 
 @app.get("/export")
 def export_news(session: Session = Depends(get_session)):
