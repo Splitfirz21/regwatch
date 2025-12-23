@@ -32,10 +32,10 @@ def scheduled_scrape():
     with Session(db_engine) as session:
         existing_db_items = session.exec(select(NewsItem)).all()
         url_map = {item.url: item for item in existing_db_items}
-        existing_titles = [(item.title, item) for item in existing_db_items]
         
         new_count = 0
         updated_count = 0
+        new_items_to_embed = []
         
         for item in items:
             # 1. URL Check (Exact Match)
@@ -48,8 +48,22 @@ def scheduled_scrape():
             else:
                 # Add new item
                 session.add(item)
+                new_items_to_embed.append(item)
                 url_map[item.url] = item 
                 new_count += 1
+        
+        # CRITICAL: Save changes!
+        session.commit()
+        
+        # Refresh to get IDs for embedding
+        for i in new_items_to_embed:
+            session.refresh(i)
+
+    # Cloud Brain: Generate Embeddings for new items
+    if new_items_to_embed:
+        print(f"Generating embeddings for {len(new_items_to_embed)} new items...")
+        vector_engine.index_items(new_items_to_embed)
+
     print(f"Scraped {len(items)} items. Added {new_count}, Updated {updated_count}.")
 
 @asynccontextmanager
