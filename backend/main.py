@@ -65,25 +65,7 @@ def scheduled_scrape():
         vector_engine.index_items(new_items_to_embed)
 
     print(f"Scraped {len(items)} items. Added {new_count}, Updated {updated_count}.")
-@app.get("/debug/db")
-def debug_db_connection(session: Session = Depends(get_session)):
-    """Debug endpoint to check where the DB is connected."""
-    import os
-    db_url = os.environ.get("DATABASE_URL", "NOT_SET")
-    is_sqlite = "sqlite" in str(db_engine.url)
-    
-    # Check actual count
-    try:
-        count = session.exec(select(func.count(NewsItem.id))).one()
-    except:
-        count = -1
-        
-    return {
-        "env_var_found": db_url != "NOT_SET",
-        "active_engine_url": str(db_engine.url).split("@")[-1], # Mask password
-        "is_sqlite": is_sqlite,
-        "actual_row_count": count
-    }
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
@@ -105,6 +87,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/debug/db")
+def debug_db_connection(session: Session = Depends(get_session)):
+    """Debug endpoint to check where the DB is connected."""
+    import os
+    db_url = os.environ.get("DATABASE_URL", "NOT_SET")
+    is_sqlite = "sqlite" in str(db_engine.url)
+    
+    # Check actual count
+    try:
+        count = session.exec(select(func.count(NewsItem.id))).one()
+    except:
+        count = -1
+        
+    return {
+        "env_var_found": db_url != "NOT_SET",
+        "active_engine_url": str(db_engine.url).split("@")[-1], # Mask password
+        "is_sqlite": is_sqlite,
+        "actual_row_count": count
+    }
 
 @app.post("/scan")
 def trigger_scan(background_tasks: BackgroundTasks):
